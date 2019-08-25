@@ -402,13 +402,5 @@ GraficaRandom.rutaAumentante(nodo_fuente, nodo_pozo)
 #GraficaRandom.FordF(nodo_fuente, nodo_pozo)
 visualizarGrafica(GraficaRandom)
 #print(GraficaRandom.vertices)
-
 #Grafica.rutaAumentante('s', 't')
-'''
-
-
-
-'''
-G_listas = GraficaListas(['A', 'B', 'C'], [('A', 'B', 1), ('B', 'C', 2), ('C', 'A', 3)])
-G_listas.imprime_grafica()
 '''
