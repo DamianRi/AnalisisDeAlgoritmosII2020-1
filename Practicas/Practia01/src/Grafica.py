@@ -48,11 +48,12 @@ class GraficaMatriz:
 
         self.matrix = np.zeros((n_nodos, n_nodos))
         for i in range(0, n_nodos-1):
-            self.vertices.append(str(i))
+            self.vertices.append(i)
+
             for j in range(i+1, n_nodos): 
                 self.matrix[i][j] = random.randrange(20)
-                self.aristas.append((str(i), str(j), self.matrix[i][j]))
-        self.vertices.append(str(n_nodos-1))        
+                self.aristas.append([i, j, self.matrix[i][j]])
+        self.vertices.append(n_nodos-1)        
 
         self.matrix[0][n_nodos-1] = 0
 
@@ -63,28 +64,32 @@ class GraficaMatriz:
         Recibe como parámetros un nodo S (fuente) y T (pozo) en la gráfica
     '''
     def FordF(self, s, t):
-        ruta = self.rutaAumentante(s, t)
-        max_flujo = 0
 
-        while ruta[0] != []:#Mientas exista una ruta de s a t
-            
-            print("RUTA: "+str(ruta))
-            delta = ruta[1] #Obtenemos el valor delta de la ruta encontrada
-            print("Delta Actual: "+str(delta))
-            max_flujo += delta
-            #Actualizamos los valores de las aristas dentro de la ruta
+        ruta_delta = self.rutaAumentante(s, t)
+        ruta = ruta_delta[0]
+        delta = ruta_delta[1]
+        flujo_maximo = 0
 
-            for x in range(0, len(ruta)):
+        x = 0
+        while ruta != []:
+            x+=1
+            flujo_maximo += delta
+            print("\nFLUJO MAXIMO: "+str(flujo_maximo))
+            print("RUTA ACTUAL: "+str(ruta))
+            print("DELTA ACTUAL: "+str(delta))
 
-                print("Actualizamos la casilla ("+str(ruta[0][x])+","+str(ruta[0][x+1])+")" )
-                self.matrix[ruta[0][x]][ruta[0][x+1]] -= delta #Actualizamos los flujos de las aristas de la ruta
-                self.matrix[ruta[0][x+1]][ruta[0][x]] += delta
+            for i in range(len(ruta)-1):
+                print("Actualizando la casilla: "+str(ruta[i]) +","+str(ruta[i+1]) )
+                self.matrix[ruta[i]][ruta[i+1]] = self.matrix[ruta[i]][ruta[i+1]] - delta
+                self.matrix[ruta[i+1]][ruta[i]] = self.matrix[ruta[i+1]][ruta[i]] + delta
                 print(self.matrix)
                 
 
-            ruta = self.rutaAumentante(s, t) # Actualizamos la ruta aumentante
+            ruta_delta = self.rutaAumentante(s, t)
+            ruta = ruta_delta[0]
+            delta = ruta_delta[1]
 
-        print("MATRIZ FINAL CON FLUJO MÁXIMO: "+str(max_flujo))
+        print("MATRIZ FINAL CON FLUJO MÁXIMO: "+str(flujo_maximo))
         print(self.matrix)
 
 
@@ -95,29 +100,88 @@ class GraficaMatriz:
         Devuelve una lista con los nombres de los vértices de la ruta.
     '''
     def rutaAumentante(self,s, t):
-        i_s = self.vertices.index(s)
-        i_t = self.vertices.index(t)
+        i_s = self.vertices.index(int(s))
+        i_t = self.vertices.index(int(t))
         print("ORIGEN: "+str(i_s)+" - DESTINO: "+str(i_t))
-        stack = []
-        stack.append(i_s)
-        visitados = []
-        while stack != []:
-            print("")
-            print("- Stack: "+str(stack))
-            print("< Visitados: "+str(visitados))
-            actual = stack.pop()
-            print("o Actual: "+ str(actual))
-            if actual == i_t:
-                print("LLegamos al destino")
-
-            if actual not in visitados:
-                visitados.append(actual)
-
-                for vecino in range(actual, len(self.vertices)-1):
-                    if self.matrix[actual][vecino] != 0:
-                        stack.append(vecino)
-        return []                        
+        
+        vertices = {}
+        #print("VERTICES: "+str(self.vertices))
+        for vertice in self.vertices: # Para cada vecino en la lista de vecinos
+            vecinos = []
+            #print("AGREGANDO VERTICE: "+str(vertice))
+            for vecino in range(vertice, len(self.vertices)): # Buscamos sobre los vecinos del vértice actual
                 
+                if self.matrix[vertice][vecino] != 0:   # Sabemos que es vecino si tiene un valor en la arista
+                    vecinos.append(vecino)  # Lo agregamos en la lista de vecinos de cada vertice                
+            
+            vertices[vertice] = [None, '', False, vecinos] # Distancia, padre, visitado, vecinos 
+            #print(str(vertices))
+        
+        vertices[len(self.vertices)-1] =[None, '', False, []]  # Agregamos el nodo final con valores nulos
+
+        vertices[int(s)][0] = 0
+        cola = deque([])
+        cola.append([int(s), 0])  # Inicializamos la cola con el vértice origen con distancia cero
+        print(vertices)
+        while len(cola) != 0:   # Mientras la cola no este vacia
+            #print(vertices)
+            #print(self.matrix)
+            actual = cola.popleft()
+            vertices[actual[0]][2] = True
+
+            if actual[0] == int(t):
+                print("LLegamos a T")
+                break
+
+
+            for vecino in vertices[actual[0]][3]: # Obtenemos la lista de vecinos del vertice actual
+                #print(vertices[vecino])
+                
+                visitado = vertices[vecino][2]
+                #print(visitado)
+                flujo = self.matrix[actual[0]][vecino]
+                #print(flujo)
+                
+                if not visitado and flujo != 0:
+                    #print("vertices[vecino][0]: "+str(vertices[vecino][0]))
+                    if vertices[vecino][0] < actual[1] + self.matrix[actual[0]][vecino]:
+                        vertices[vecino][0] = vertices[actual[0]][0] + self.matrix[actual[0]][vecino]
+                        vertices[vecino][1] = actual[0]
+                        cola.append([vecino, vertices[vecino][0]])
+
+        
+        
+
+        # Recreamos la ruta iniciando desde el nodo final
+        ruta = []
+        v = vertices[int(t)] 
+        #print("PADRE DE T:"+str(v[1]))
+        ruta.append(int(t))
+        padre = v[1]
+
+        if padre == '':
+            print("NO HAY RUTA")
+            return ([], 0)
+
+        while v[1] != '':
+            ruta.append(padre)
+            #print("Padre"+str(padre))
+            v = vertices[int(padre)]
+            #print("Siguinte: "+ str(v[1]))
+            padre = v[1]
+        
+        print("RUTA CREADA")
+        ruta.reverse()
+
+        # Obtenemos la lista de deltas de la ruta obtenida
+        deltas = []
+        for i in range(len(ruta)-1):
+            deltas.append(self.matrix[ruta[i]][ruta[i+1]])
+
+        print(ruta)
+        print(deltas)
+        return((ruta, min(deltas)))            
+    
 
 
 
@@ -270,10 +334,7 @@ class GraficaListas:
                         vertices[vecino[0]][1] = actual[0]
                         cola.append([vecino[0], vertices[vecino[0]][0]])
 
-        '''
-        for x in vertices:
-            print(x+":"+str(vertices[x]))
-        '''
+
         # Recreamos la ruta iniciando desde el nodo final
         ruta = []
         v = vertices[t] 
@@ -324,12 +385,11 @@ def visualizarGrafica(grafica):
         G.add_node(item, color='blue')
     for item in grafica.aristas:
         G.add_edge(item[0], item[1])
-    nx.draw(G, node_color = '#ffa987')
-    plt.show()
-'''
+    #nx.draw(G, node_color = '#ffa987')
+    #plt.show()
 
 
-    pos=nx.spring_layout(G) # positions for all nodes
+    pos = nx.spring_layout(G) # positions for all nodes
     # nodes
     nx.draw_networkx_nodes(G,pos,
                         nodelist=grafica.vertices,
@@ -345,13 +405,6 @@ def visualizarGrafica(grafica):
     plt.axis('off')
     #plt.savefig("grafica.png")
     plt.show()
-'''
-
-'''
-D = nx.gn_graph(10)  # the GN graph
-nx.draw(D)
-plt.show()
-'''
 
 
 
@@ -376,31 +429,23 @@ Grafica.imprime_grafica()
 '''
 
 '''
+'''
 # USO PARA GRAFICA CON LISTAS
 GraficaL = GraficaListas([], [])
-n_nodos = input("Ingresa un número de nodos para la gráfica: ")
+n_nodos = input("Ingresa un número de nodos para la Gráfica con LISTAS: ")
 s = '0'
 t = str(n_nodos-1)
 GraficaL.graficaRandom(n_nodos)
 GraficaL.imprime_grafica()
 GraficaL.FordF(s, t)
 visualizarGrafica(GraficaL)
-'''
 
-
-
-
-'''
-AQUI VA LA GRAFICA DE MATRICES
-GraficaRandom = GraficaMatriz([],[])
-n_nodos = input("Ingresa una Cantidad de nodos: ")
-GraficaRandom.graficaRandom(n_nodos)
-GraficaRandom.imprime_grafica()
-nodo_fuente = '0'
-nodo_pozo = str(n_nodos-1)
-GraficaRandom.rutaAumentante(nodo_fuente, nodo_pozo)
-#GraficaRandom.FordF(nodo_fuente, nodo_pozo)
-visualizarGrafica(GraficaRandom)
-#print(GraficaRandom.vertices)
-#Grafica.rutaAumentante('s', 't')
-'''
+# USO PARA GRAFICA CON MATRICES
+GraficaM = GraficaMatriz([], [])
+n_nodos = input("Ingresa un número de nodos para la Gráfica con MATRICES: ")
+s = '0'
+t = str(n_nodos-1)
+GraficaM.graficaRandom(n_nodos)
+GraficaM.imprime_grafica()
+GraficaM.FordF(s, t)
+visualizarGrafica(GraficaM)
