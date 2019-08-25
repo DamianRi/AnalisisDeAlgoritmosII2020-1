@@ -129,7 +129,8 @@ class GraficaListas:
 
     '''
     Recibe un parametro 'vertices', una lista del nombre de los vertices.
-    Una lista de tuplas 'aristas', con su capacidad
+    Una lista de listas 'aristas', con su capacidad
+    La cabeza de cada lista es el nodo origen y el resto son sus vecinos
     '''
     def __init__(self, vertices, aristas):
         self.vertices = vertices #lista de los nombres de los vértices
@@ -147,35 +148,42 @@ class GraficaListas:
         
         self.residual = self.lista
 
-    '''
 
+
+    '''
+        Método para imprimir la lista de listas de los nodos
     '''
     def imprime_grafica(self):
         for vertice in self.lista:
             print(str(vertice)+"\n")
-    
+
+
+
+
     '''
-    
+        Método para generar una gráfica con una cantidad 'n_nodos'
+        con valores aleatorios en las aristas
     '''
     def graficaRandom(self, n_nodos):
         
-        vertices = []
-        aristas = []
+        self.vertices = []
+        self.aristas = []
 
         matrix = np.zeros((n_nodos, n_nodos))
         for i in range(0, n_nodos-1):
-            vertices.append(str(i))
+            self.vertices.append(str(i))
+            
             for j in range(i+1, n_nodos): 
-                matrix[i][j] = random.randrange(2, 20)
-                aristas.append((str(i), str(j), matrix[i][j]))
-        vertices.append(str(n_nodos-1))
+                matrix[i][j] = random.randrange(20) + 1
+                self.aristas.append((str(i), str(j), matrix[i][j]))
+        self.vertices.append(str(n_nodos-1))
 
         self.lista = [] #lista para la listas de los nodos con sus tuplas de aristas
         
-        for v in vertices: # para cada vértice agregamos su lista de vecinos
+        for v in self.vertices: # para cada vértice agregamos su lista de vecinos
             vecinos = []
             vecinos.append([v, 0])
-            for a in aristas: # buscamos sobre las aristas la que inicie con el vértice actual
+            for a in self.aristas: # buscamos sobre las aristas la que inicie con el vértice actual
                 if v == a[0]:
                     vecinos.append([a[1], a[2]]) # agregamos el vértice vecino a su lista de vecinos
 
@@ -187,7 +195,44 @@ class GraficaListas:
         Recibe como parámetros un nodo S (fuente) y T (pozo) en la gráfica
     '''    
     def FordF(self, s, t):
-        self.rutaAumentante(s, t)
+        ruta_delta = self.rutaAumentante(s, t)
+
+        ruta = ruta_delta[0]
+        delta = ruta_delta[1]
+        flujo_maximo = 0
+
+        x = 0
+        while ruta != [] and x < 10:
+            x+=1
+            print("FLUJO MAXIMO: "+str(flujo_maximo))
+            print("RUTA ACTUAL: "+str(ruta))
+            print("DELTA ACTUAL: "+str(delta))
+            flujo_maximo += delta
+
+            for vertice in range(len(ruta)):
+                #print("\n"+ruta[vertice])
+                for v in self.lista:
+                    #print(v[0][1:])
+                    #print(v[0][0][0] == ruta[vertice])
+                    if v[0][0][0] == ruta[vertice]:
+                        #print("VECINOS ")
+                        for vecino in v[0][1:]:
+                            #print(vecino)
+                            if vecino[0] == ruta[vertice+1]:
+                                #print("Vecino siguiente")
+                                #print(vecino)
+                                #print(vecino[1])
+                                vecino[1] = vecino[1] - delta
+                                #print(vecino[1])
+
+            self.imprime_grafica()
+            ruta_delta = self.rutaAumentante(s, t)
+            ruta = ruta_delta[0]
+            delta = ruta_delta[1]
+
+        print("FLUJO MAXIMO: "+str(flujo_maximo))
+
+
 
 
     '''
@@ -199,38 +244,40 @@ class GraficaListas:
     def rutaAumentante(self, s, t):
         vertices = {}
         for vertice in self.lista:
-            print(str(vertice))
+            #print(str(vertice))
             vertices[vertice[0][0][0]] = [None, '', False, vertice[0][1:]] #distancia, padre, visitado
         
         vertices[s][0] = 0
         cola = deque([])
         cola.append([s, 0])
-        print(str(vertices))
-        print(str(cola))
+        #print(str(vertices))
+        #print(str(cola))
 
         while len(cola) != 0:
             actual = cola.popleft()
             vertices[actual[0]][2] = True
 
             if actual[0] == t:
-                print("LLEGAMOS A T")
+                #print("LLEGAMOS A T")
                 break
 
             for vecino in vertices[actual[0]][3]:
-                print (str(vecino))
-                if vertices[vecino[0]][2] == False:
-                    print("Vecinos no visitados "+str(vecino[0]))
+                #print (str(vecino))
+                if vertices[vecino[0]][2] == False and vecino[1] != 0:
+                    #print("Vecinos no visitados "+str(vecino[0]))
                     if vertices[vecino[0]][0] < actual[1] + vecino[1]:
                         vertices[vecino[0]][0] = vertices[actual[0]][0] + vecino[1]
                         vertices[vecino[0]][1] = actual[0]
                         cola.append([vecino[0], vertices[vecino[0]][0]])
 
+        '''
         for x in vertices:
             print(x+":"+str(vertices[x]))
-
+        '''
+        # Recreamos la ruta iniciando desde el nodo final
         ruta = []
         v = vertices[t] 
-        print("PADRE DE T:"+str(v[1]))
+        #print("PADRE DE T:"+str(v[1]))
         ruta.append(t)
         padre = v[1]
 
@@ -240,15 +287,32 @@ class GraficaListas:
 
         while v[1] != '':
             ruta.append(padre)
-            print("Padre"+str(padre))
+            #print("Padre"+str(padre))
             v = vertices[padre]
-            print("Siguinte: "+ str(v[1]))
+            #print("Siguinte: "+ str(v[1]))
             padre = v[1]
         
         print("RUTA CREADA")
         ruta.reverse()
+
+        # Obtenemos la lista de deltas de la ruta obtenida
+        deltas = []
+        for vertice in range(len(ruta)):
+            #print("\n"+ruta[vertice])
+            for v in self.lista:
+                if v[0][0][0] == ruta[vertice]:
+                    for vecino in v[0][1:]:
+                        if vecino[0] == ruta[vertice+1]:
+                            deltas.append(vecino[1])          
+
         print(ruta)
-        return(ruta, 0)
+        print(deltas)
+        return(ruta, min(deltas))
+
+
+
+
+
 
 '''
     Método para desplegar una visualización de las gráficas
@@ -289,7 +353,10 @@ nx.draw(D)
 plt.show()
 '''
 
+
+
 '''
+# Implementación de una lista ingresando vértices y aristas, uno por uno
 Grafica = GraficaListas(['s', 'u', 'v', 'w','x', 'y', 'z', 't'], 
 [('s', 'u', 1),
 ('s', 'w', 3),
@@ -305,13 +372,23 @@ Grafica = GraficaListas(['s', 'u', 'v', 'w','x', 'y', 'z', 't'],
 ('z', 'w', 3),
 ('z', 't', 4),
 ('t', 'v', 3)])
-'''
-#Grafica.imprime_grafica()
-Grafica = GraficaListas([], [])
-Grafica.graficaRandom(6)
 Grafica.imprime_grafica()
-#Grafica.rutaAumentante('0','5')
-Grafica.FordF('0', '5')
+'''
+
+'''
+# USO PARA GRAFICA CON LISTAS
+GraficaL = GraficaListas([], [])
+n_nodos = input("Ingresa un número de nodos para la gráfica: ")
+s = '0'
+t = str(n_nodos-1)
+GraficaL.graficaRandom(n_nodos)
+GraficaL.imprime_grafica()
+GraficaL.FordF(s, t)
+visualizarGrafica(GraficaL)
+'''
+
+
+
 
 '''
 AQUI VA LA GRAFICA DE MATRICES
