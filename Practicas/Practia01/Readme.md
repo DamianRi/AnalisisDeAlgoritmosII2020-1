@@ -25,11 +25,13 @@
 NOTAS:
   - Se debe tener instalada la versión Python 3.6.8 como mínimo, ya que el programa fue desarrollado con este ( aunque al parecer también funciona con Python 2.7)
   - Deben instalarse los siguientes paquetes con el comando:
-    Para Ubuntu
+
+  Para Ubuntu
   ```
     $ sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
   ```
-    Para Mac
+  
+  Para Mac
   ```
     $ sudo port install py35-numpy py35-scipy py35-matplotlib py35-ipython +notebook py35-pandas py35-sympy py35-nose  
   ```
