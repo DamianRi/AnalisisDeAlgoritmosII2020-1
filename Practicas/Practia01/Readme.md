@@ -41,7 +41,7 @@ NOTAS:
     $ pip install networkx
   ```
 Un vez instalados los paquetes previamente señalados.
-Dentro de la carpeta 'src' se encuentra el archivo 'Grafica.py', para correr el programa únicamente se debe ejecutar con el comando
+Dentro de la carpeta `src` se encuentra el archivo `Grafica.py`, para correr el programa únicamente se debe ejecutar con el comando
 ```
   $ python Grafica.py
 ```
