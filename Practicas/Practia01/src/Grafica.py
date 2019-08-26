@@ -34,7 +34,11 @@ class GraficaMatriz:
                     j = vertices.index(a[1]) # índice del nodo destino de la arista
                     self.matrix[i][j] = a[2]
 
+        self.aristas_residual = self.vertices
 
+    '''
+        Método para imprimir la matriz de la gráfica
+    '''
     def imprime_grafica(self):
         print(self.matrix)
 
@@ -55,7 +59,8 @@ class GraficaMatriz:
                 self.aristas.append([i, j, self.matrix[i][j]])
         self.vertices.append(n_nodos-1)        
 
-        self.matrix[0][n_nodos-1] = 0
+        # Valores para generar la red residual
+        self.aristas_residual = []
 
 
 
@@ -82,6 +87,7 @@ class GraficaMatriz:
                 print("Actualizando la casilla: "+str(ruta[i]) +","+str(ruta[i+1]) )
                 self.matrix[ruta[i]][ruta[i+1]] = self.matrix[ruta[i]][ruta[i+1]] - delta
                 self.matrix[ruta[i+1]][ruta[i]] = self.matrix[ruta[i+1]][ruta[i]] + delta
+                self.aristas_residual.append((str(ruta[i+1]), str(ruta[i]), self.matrix[ruta[i+1]][ruta[i]]))
                 print(self.matrix)
                 
 
@@ -183,8 +189,6 @@ class GraficaMatriz:
         return((ruta, min(deltas)))            
     
 
-
-
 '''
 Clase para la representación abstracta de Gráficas dirigidas 
 mediante una lista de listas, de nodos con sus nodos vecinos y pesos de las aristas
@@ -210,7 +214,7 @@ class GraficaListas:
 
             self.lista.append([vecinos]) # guardamos la lista con el nodo y su lista de vecinos
         
-        self.residual = self.lista
+        self.aristas_residual = []
 
 
 
@@ -265,10 +269,8 @@ class GraficaListas:
         delta = ruta_delta[1]
         flujo_maximo = 0
 
-        x = 0
-        while ruta != [] and x < 10:
-            x+=1
-            print("FLUJO MAXIMO: "+str(flujo_maximo))
+        while ruta != []:
+            print("\nFLUJO MAXIMO: "+str(flujo_maximo))
             print("RUTA ACTUAL: "+str(ruta))
             print("DELTA ACTUAL: "+str(delta))
             flujo_maximo += delta
@@ -288,6 +290,7 @@ class GraficaListas:
                                 #print(vecino[1])
                                 vecino[1] = vecino[1] - delta
                                 #print(vecino[1])
+                                
 
             self.imprime_grafica()
             ruta_delta = self.rutaAumentante(s, t)
@@ -295,7 +298,7 @@ class GraficaListas:
             delta = ruta_delta[1]
 
         print("FLUJO MAXIMO: "+str(flujo_maximo))
-
+        self.imprime_grafica()
 
 
 
@@ -388,23 +391,31 @@ def visualizarGrafica(grafica):
     #nx.draw(G, node_color = '#ffa987')
     #plt.show()
 
-
     pos = nx.spring_layout(G) # positions for all nodes
-    # nodes
     nx.draw_networkx_nodes(G,pos,
                         nodelist=grafica.vertices,
                         node_color='#ffa987',
-                        node_size=500,
-                    alpha=0.8)
+                        node_size=200,
+                        alpha=0.8)                        
     nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)                
-    nx.draw_networkx_edges(G,pos,
-                        edgelist=grafica.aristas,
-                        width=3,alpha=0.5,edge_color='#444140')                   
-    #nx.draw(G)
-    nx.draw_networkx_labels(G,pos,font_size=16)
+    nx.draw_networkx_labels(G,pos,font_size=10)
     plt.axis('off')
-    #plt.savefig("grafica.png")
     plt.show()
+
+    # VISUALIZAR LA GRAFICA RESIDUAL
+    if grafica.aristas_residual != []:
+        G.clear()
+        for item in grafica.aristas_residual:
+            G.add_edge(item[0], item[1])    
+
+        pos = nx.spring_layout(G) # positions for all nodes
+        nx.draw_networkx_edges(G,pos,width=1.0,alpha=0.5)                
+        nx.draw_networkx_labels(G,pos,font_size=10)                
+
+        plt.axis('off')
+        plt.show()
+
+
 
 
 
