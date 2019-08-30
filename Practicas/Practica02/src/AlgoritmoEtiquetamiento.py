@@ -1,12 +1,14 @@
 #!usr/bin/python3
 #-*- coding:utf-8 -*-
 
-import numpy as np
+'''
 import networkx as nx
 import matplotlib.pyplot as plt
-import random
 from collections import deque
+'''
 
+import numpy as np
+import random
 '''
 Clase para la representación abstracta de Gráficas Dirigidas
 mediante matrices de adyacencia
@@ -69,6 +71,11 @@ class GraficaMatriz:
         sobre una gráfica matricial
     '''
     def algoritmo_etiquetamiento(self, s, t):
+        print(" - MATRIZ INICIAL - ")
+        self.imprime_grafica()
+
+        print("\n <<< ENVIO DE FLUJO DE s:"+s+" a t:"+t)
+
         vertices = self.diccionario_inicial(s, t) # Obtenemos los vertices con su distancia
         vertices[int(t)][2] = True # Etiquetamos al nodo 't'
 
@@ -98,8 +105,9 @@ class GraficaMatriz:
             if vertices[int(t)][2]: # Si 't' esta etiquetado
                 self.aumenta(s, t, vertices)
 
+        print(" >>> FLUJO TOTAL: "+ str(self.flujo_total)) # Imprimimos el flujo total 
+        print("\n - MATRIZ FINAL -")
         self.imprime_grafica() # Imprimimos la gráfica final
-        print("FLUJO TOTAL: "+ str(self.flujo_total)) # Imprimimos el flujo total 
 
     '''
         Método Aumenta, que actualiza el flujo de la gráfica
@@ -120,7 +128,7 @@ class GraficaMatriz:
             v = vertices[int(padre)]
             padre = v[1]
         
-        print("Ruta Aumentante")
+        print("\nRuta Aumentante")
         ruta_aumentante.reverse()        
         print(ruta_aumentante)
 
@@ -130,7 +138,7 @@ class GraficaMatriz:
         for i in range(len(ruta_aumentante)-1):
             deltas.append(self.matrix[ruta_aumentante[i]][ruta_aumentante[i+1]])
         min_delta = min(deltas)
-        print("Delta minima: "+str(min_delta))
+        print("Delta minima: "+str(min_delta)+"\n")
 
 
         for x in range(len(ruta_aumentante)-1): # Recorremos las aristas de la ruta P 
@@ -149,7 +157,6 @@ class GraficaMatriz:
     def diccionario_inicial(self, s, t):
         i_s = self.vertices.index(int(s))
         i_t = self.vertices.index(int(t))
-        print("ORIGEN: "+str(i_s)+" - DESTINO: "+str(i_t))
         
         vertices = {}
         for vertice in self.vertices: # Para cada vecino en la lista de vecinos
@@ -168,9 +175,8 @@ class GraficaMatriz:
 
 
 grafica = GraficaMatriz([], [])
-n_nodos = input(" # Nodos gráfica con matrices : ")
+n_nodos = input(" Ingresa un número de nodos para la gráfica (matriz de adyacencias) : ")
 s = '0'
 t = str(n_nodos-1)
 grafica.graficaRandom(n_nodos)
-grafica.imprime_grafica()
 grafica.algoritmo_etiquetamiento(s, t)
