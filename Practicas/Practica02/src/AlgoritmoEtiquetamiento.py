@@ -1,14 +1,9 @@
 #!usr/bin/python3
 #-*- coding:utf-8 -*-
 
-'''
-import networkx as nx
-import matplotlib.pyplot as plt
-from collections import deque
-'''
-
 import numpy as np
 import random
+
 '''
 Clase para la representación abstracta de Gráficas Dirigidas
 mediante matrices de adyacencia
@@ -58,7 +53,7 @@ class GraficaMatriz:
             self.vertices.append(i)
 
             for j in range(i+1, n_nodos): 
-                self.matrix[i][j] = random.randrange(20)
+                self.matrix[i][j] = random.randrange(0, 100)
                 self.aristas.append([i, j, self.matrix[i][j]])
         self.vertices.append(n_nodos-1)        
         self.matrix[0][n_nodos-1] = 0
@@ -154,10 +149,7 @@ class GraficaMatriz:
         Método que genera un diccionario con los valores de la gráfica 
         mapeados
     '''
-    def diccionario_inicial(self, s, t):
-        i_s = self.vertices.index(int(s))
-        i_t = self.vertices.index(int(t))
-        
+    def diccionario_inicial(self, s, t):        
         vertices = {}
         for vertice in self.vertices: # Para cada vecino en la lista de vecinos
             vecinos = []
