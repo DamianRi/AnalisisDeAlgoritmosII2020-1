@@ -420,26 +420,44 @@ def visualizarGrafica(grafica):
 
 
 '''
+'''
 # Implementación de una lista ingresando vértices y aristas, uno por uno
-Grafica = GraficaListas(['s', 'u', 'v', 'w','x', 'y', 'z', 't'], 
-[('s', 'u', 1),
-('s', 'w', 3),
-('u', 'w', 5),
-('v', 'u', 3),
-('w', 'v', 2),
-('w', 'x', 8),
-('w', 't', 2),
-('x', 's', 2),
-('x', 'y', 6),
-('y', 'w', 3),
-('y', 'z', 5),
-('z', 'w', 3),
-('z', 't', 4),
-('t', 'v', 3)])
-Grafica.imprime_grafica()
-'''
+Grafica = GraficaListas(['s', 'a', 'b', 'c','d', 'e', 'f', 'u', 'v', 'w', 'x', 't'], 
+[('s', 'a', 14),
+('s', 'u', 12),
+('s', 'd', 14),
+('a', 'b', 4),
+('a', 'w', 12),
+('a', 'v', 12),
+('b', 'c', 5),
+('b', 'x', 8),
+('c', 't', 12),
+('c', 'x', 7),
+('d', 'e', 4),
+('d', 'u', 12),
+('d', 'v', 12),
+('e', 'f', 12),
+('e', 'x', 4),
+('f', 't', 14),
+('u', 'a', 12),
+('u', 'w', 10),
+('u', 'e', 4),
+('w', 'v', 10),
+('w', 'd', 12),
+('w', 'b', 7),
+('w', 'e', 8),
+('v', 'f', 4),
+('v', 'b', 7),
+('v', 'e', 12),
+('v', 'c', 10),
+('v', 'x', 12),
+('x', 't', 14),
+('x', 'f', 6)])
 
-'''
+Grafica.FordF('s', 't')
+#Grafica.imprime_grafica()
+
+
 '''
 # USO PARA GRAFICA CON LISTAS
 GraficaL = GraficaListas([], [])
@@ -460,3 +478,4 @@ GraficaM.graficaRandom(n_nodos)
 GraficaM.imprime_grafica()
 GraficaM.FordF(s, t)
 visualizarGrafica(GraficaM)
+'''
