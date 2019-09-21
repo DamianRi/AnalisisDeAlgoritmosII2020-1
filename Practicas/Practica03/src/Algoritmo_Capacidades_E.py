@@ -44,26 +44,30 @@ class GraficaMatriz:
         self.vertices = []
         self.aristas = []
         self.tam = n_nodos
-        self.matrix = np.zeros((self.tam, self.tam))
-        for i in range(0, self.tam-1):
-            self.vertices.append(i)
+        self.matrix = np.zeros((self.tam, self.tam)) # Creamos una matriz de tam x tam
+        for i in range(0, self.tam-1): # Para cada nodo en la matriz 
+            self.vertices.append(i) # Guardamos la lista de nodos
 
-            for j in range(i+1, self.tam): 
-                self.matrix[i][j] = random.randrange(0, 50)
-                self.aristas.append([i, j, self.matrix[i][j]])
+            for j in range(i+1, self.tam): # Revisamos solos los vecinos "hacia adelante" del nodo i
+                self.matrix[i][j] = random.randrange(0, 50) # agregamos un valor aleatorio
+                self.aristas.append([i, j, self.matrix[i][j]]) # agregamos la asísta 
         self.vertices.append(self.tam-1)        
         self.delta_matrix = np.zeros((self.tam, self.tam))
 
 
     '''
         Generar delta gráfica
+        delta - capacidad que deben cumplir las aristas de la gráfica creada
     '''
     def delta_grafica(self, delta):
         print("\n ** "+str(int(delta))+" - Delta Gŕafica **")
-        self.delta_matrix = np.zeros((self.tam, self.tam))
-        for i, renglon in enumerate(self.matrix):
-            for j, columna in enumerate(self.matrix[i]):
+        self.delta_matrix = np.zeros((self.tam, self.tam))  
+
+        for i, renglon in enumerate(self.matrix):   # Recorremos los renglones de la matriz
+            for j, columna in enumerate(self.matrix[i]):    # Recorremos los elementos de cada renglon
+
                 arista_actual = self.matrix[i][j] # Revisamos si la arista (i,j)
+                
                 if arista_actual >= delta: # Si la arista es tiene flujo mayor o igual a 'delta' 
                     self.delta_matrix[i][j] = arista_actual # La guardamos en la delta grafica
         print(self.delta_matrix)
@@ -77,7 +81,8 @@ class GraficaMatriz:
         for i, renglon in enumerate(self.matrix): # Recorremos todos los renglones
             for j, columna in enumerate(self.matrix[i]): # Recorremos todas las columnas
                 actual_u = self.matrix[i][j]
-                if U < actual_u:
+
+                if U < actual_u:    # Obtenemos la capacidad más grande de las aristas
                     U = actual_u
         return U
 
@@ -121,7 +126,7 @@ class GraficaMatriz:
                 print(self.delta_matrix)
                 print("\n >>>>> Gráfica Original ACTUALIZADA")
                 print(self.matrix)
-
+                self.delta_grafica(delta) # Actualizamos la delta gráfica para tomar aristas con valores actualizados 
                 vertices = self.diccionario_inicial(s, t) # Valores de vértices de la delta gráfica
                 self.dijkstra(s, t, vertices) # Generamos posible ruta sobre la delta gráfica
                 ruta = self.existeRuta_deltaGrafica(s, t, vertices) # actualizamos los valores para saber si aun existe ruta
@@ -137,29 +142,36 @@ class GraficaMatriz:
 
     '''
         Dijkstra
+        s - cadena del nombre del nodo origen 
+        t - cadena del nombre del nodo destino
+        vertices - diccionario para guardar los estados de cada nodo
     '''
     def dijkstra(self, s, t, vertices):
         
-        vertices[int(s)][0] = 0
-        cola = deque([])
+        vertices[int(s)][0] = 0 # Hacemos la distancia del nodo origen como 0
+        cola = deque([])    # Cola para recorrer todos los nodos
         cola.append(int(s))  # Inicializamos la cola con el vértice origen con distancia cero
-        while len(cola) != 0:   # Mientras la cola no este vacia
-            actual = cola.popleft()
-            vertices[actual][2] = True
 
-            if actual == int(t):
+        while len(cola) != 0:   # Mientras la cola no este vacia
+            actual = cola.popleft() # Tomamos el nodo siguiente
+            vertices[actual][2] = True  # lo marcamos como visitado
+
+            if actual == int(t):    # Verificamos si ya hemos llegado al nodo destino
                 break
 
             for vecino in vertices[actual][3]: # Obtenemos la lista de vecinos del vertice actual
                 
-                visitado = vertices[vecino][2]
-                flujo = self.delta_matrix[actual][vecino]
+                visitado = vertices[vecino][2]  # Valor de 'visitado' del nodo vecino
+                flujo = self.delta_matrix[actual][vecino]   # Valor del flujo que se puede enviar al vecino
                 
-                if not visitado and flujo != 0:
+                if not visitado and flujo != 0: # Si no ha sido visitado y aun puede enviar flujo
+
+                    # Verificamos si podemos enviar más flujo por el vecino actual que por la ruta actual
                     if vertices[vecino][0] < vertices[actual][0] + self.delta_matrix[actual][vecino]:
-                        vertices[vecino][0] = vertices[actual][0] + self.delta_matrix[actual][vecino]
-                        vertices[vecino][1] = actual
-                        cola.append(vecino)
+
+                        vertices[vecino][0] = vertices[actual][0] + self.delta_matrix[actual][vecino] # Actualizamos la distancia al nodo vecino
+                        vertices[vecino][1] = actual    # Marcamos el nodo padre del vecino con el nodo actual
+                        cola.append(vecino) # Agregamos el vecino a la cola 
 
 
     '''
@@ -167,21 +179,23 @@ class GraficaMatriz:
     '''
     def existeRuta_deltaGrafica(self, s, t, vertices):
         # Obtenemos una ruta P de 's' a 't'
-        ruta_p = []
-        v = vertices[int(t)] 
-        ruta_p.append(int(t))
-        padre = v[1]
+        ruta_p = [] # lista para guardar los nodos de la ruta
+        v = vertices[int(t)]    # Obtenemos el vertice final 
+        ruta_p.append(int(t))   # Recorremos desde el vértice final al original
+        padre = v[1]    # Tomamos el padre del vértice final
 
-        if padre == '':
-            print("\n x x x - NO HAY RUTA - x x x ")
-            return []
-
-        while v[1] != '':
-            ruta_p.append(padre)
-            v = vertices[int(padre)]
-            padre = v[1]
         
-        ruta_p.reverse()        
+        if padre == '': # Si el nodo final no tiene padre
+            # No hubo una ruta de nodos para llegar hasta el nodo final 
+            print("\n x x x - NO HAY RUTA - x x x ")
+            return []   
+
+        while v[1] != '':   # Si el nodo final tiene un nodo padre
+            ruta_p.append(padre)    # Vamos creando la ruta según los padres de cada nodo
+            v = vertices[int(padre)]    
+            padre = v[1]    # Avanzamos al siguiente nodo
+        
+        ruta_p.reverse()    # Ordenamos la ruta hacia adelante 
         print("\n= Ruta P: "+str(ruta_p))
         return ruta_p
 
@@ -193,9 +207,10 @@ class GraficaMatriz:
     def delta_min_ruta(self, ruta_p):
         # Obtenemos el min de los flujos en la ruta P
         deltas = []
-        for i in range(len(ruta_p)-1):
-            deltas.append(self.delta_matrix[ruta_p[i]][ruta_p[i+1]])
-        min_delta = min(deltas)
+        for i in range(len(ruta_p)-1): # Recorremos los indices de las rutas
+            deltas.append(self.delta_matrix[ruta_p[i]][ruta_p[i+1]]) # guardamos los valores de las capacidades sobre la ruta
+
+        min_delta = min(deltas) # Obtenemos el mínimo de las deltas obtenidas
         print(" = Delta minima: "+str(int(min_delta))+"\n")
         return min_delta
 

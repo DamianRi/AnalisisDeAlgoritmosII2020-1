@@ -1,14 +1,17 @@
 ## Práctica 3: Algoritmo de capacidades escalables
 
 #### Descripción
-Se hizo una implementación del **Algoritmo de Capcidades Escalables**, sobre gráficas con represencación de 
-matriz de adyacencias; las cuales en un inicio tiene valores en su diagonal superior, con lo cual todas las 
-aristas de la gráfica vas "hacia a delante".
+Se hizo una implementación del **Algoritmo de Capacidades Escalables**, sobre gráficas con represencación de 
+matriz de adyacencias; las cuales en un inicio tiene únicamente valores en su diagonal superior, con lo cual todas las 
+aristas de la gráfica van "hacia a delante". Las gráficas que se generan de manera aleatoria, tienen por nombre 
+un valor numérico, del cual se enviará flujo de un nodo origen a un nodo destino (Siempre se tomará como nodo origen 
+al nodo '0', y nodo destino 'n-1')
+
 
 #### Contenido
-Dentro de la carpeta **src** se encuentra el archivo **Algoritmo_Capacidades_E.py**. El cual contiene la 
-implementación del **Algoritmo de Capacidades Escalables** en Python, versión 2.7. El programa inicia 
-esperando un número entero como entrada, para así generar una gráfica, creando una matriz cuadrada de *n x n* 
+Dentro de la carpeta **src** se encuentra el archivo **Algoritmo_Capacidades_E.py**. El cual contiene la
+implementación del **Algoritmo de Capacidades Escalables** en Python, versión 2.7. El programa inicia
+esperando un número entero como entrada, para así generar una gráfica, creando una matriz cuadrada de *n x n*
 con valores aleatorios en las aristas entre los nodos.
 
 #### Ejecución
@@ -39,6 +42,6 @@ Ejemplo:
 ```
 
 Con lo cual inicia el programa, generando el despliegue de la impresión de cada matriz con su modificación y 
-su ruta tomada en dado caso.
+su ruta aumentante tomada en dado caso de enviar flujo a través de ella.
 
-El programa termina mostrando la matriz residual final y el flujo total sobre la gráfica.
+El programa termina mostrando la matriz original residual y el flujo total que se envió del nodo origen al nodo destino.
