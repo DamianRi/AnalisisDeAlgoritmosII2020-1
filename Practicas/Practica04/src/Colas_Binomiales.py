@@ -43,11 +43,9 @@ class Cola_Binomial:
 
         print("\nElementos a agregar: ",
             lista_elementos,
-            "\nSuma de los elementos: ",
-            suma,
             "\nNúmero de elementos: ",
             len(lista_elementos),
-            "\nSuma en binario: ",
+            "\nBK's necesarios: ",
             (format(len(lista_elementos), "b"))[::-1] )
 
         self.lista_elementos = lista_elementos
@@ -174,7 +172,8 @@ class Cola_Binomial:
         Dado un heap raíz del Bk
         muestra la impresión de como esta formado el Bk
     '''
-    def imprime_bk_generado(self):
+    def generar_bks(self):
+        print("\n= BK's EN LA ESTRUCTURA =")
         Bks = []
         for heap in self.array_estructura: # Para cada Heap en la estructura 
             if heap != None:    # Si no es nulo (si hay raíz del heap bk)
@@ -185,8 +184,8 @@ class Cola_Binomial:
                 info = ""   # Generaremos la información del heap actual
                 
                 for h in l_heap:    # Para cada elemento de los elementos del bk
-                    info += self.elementos_heap[h].shortToString()+"."  # Agregamos la info del elemento
-                Bks.append((grado_bk, info[0:len(info)-1]))    # Guardamos la info del Bk actual en la lista de Bk's
+                    info += self.elementos_heap[h].shortToString()+".."  # Agregamos la info del elemento
+                Bks.append((grado_bk, info[0:len(info)-2]))    # Guardamos la info del Bk actual en la lista de Bk's
         
         for bk in Bks:   # Para cada Bk en la lista imprimiremos su información
             print("B"+str(bk[0])+": "+bk[1])
@@ -195,7 +194,7 @@ class Cola_Binomial:
 
 
 if __name__ == "__main__":
-
+    print("\n < COLAS BINOMIALES >")
     # INGRESAMOS LOS ELEMENTOS PARA AGREGAR EN LA ESTRUCTURA
     '''
     ELEMENTOS = input("Elementos para agregar:  ")
@@ -215,4 +214,4 @@ if __name__ == "__main__":
     cola = Cola_Binomial(lista_random) # Creamos una nueva estructura con los elementos de l
     #cola.imprime_elementos_heap()
     #print(cola.array_estructura)
-    cola.imprime_bk_generado()
+    cola.generar_bks()
