@@ -37,6 +37,7 @@ class Heap:
 class Cola_Binomial:
 
     def __init__(self, lista_elementos):
+        lista_elementos.sort(reverse=True)  # Odrdenamos la lista de los elementos
         
         suma = sum(lista_elementos)
         size = len(format(len(lista_elementos), "b"))
@@ -169,6 +170,26 @@ class Cola_Binomial:
         return elementos
     
     '''
+    '''
+    def elementos_en_bk2(self, bk):
+        stack = []  # lista para ir recorriendo todo el bk
+        stack.append(bk.llave)    # agregamos el bk raíz
+        
+        lista = []  # lista de elementos en bk
+        while len(stack) != 0:    # mientras que haya elementos
+            print("Elementos Bk: "+str(lista))
+            actual = stack.pop()    #   tomamos el tope de la lista elementos
+            lista.append(actual)  #   agregamos la llave a la lista
+
+            for e in self.elementos_heap[actual].hijos: # para cada elemento hijo del heap actual
+                if e not in lista:
+                    stack.append(e)
+
+        return lista
+
+
+
+    '''
         Dado un heap raíz del Bk
         muestra la impresión de como esta formado el Bk
     '''
@@ -179,8 +200,9 @@ class Cola_Binomial:
             if heap != None:    # Si no es nulo (si hay raíz del heap bk)
                 
                 grado_bk = heap.grado   # Obtenemos el grado del bk actual
-                l_heap = self.elementos_en_bk(heap, []) # Obtenemos los elementos del heap actual
-                #print(l)
+                l_heap = self.elementos_en_bk2(heap) # Obtenemos los elementos del heap actual
+                #l_heap = self.elementos_en_bk(heap, [])
+                #print(l_heap)
                 info = ""   # Generaremos la información del heap actual
                 
                 for h in l_heap:    # Para cada elemento de los elementos del bk
@@ -205,13 +227,15 @@ if __name__ == "__main__":
     '''
 
     # VALORES RANDOM PARA GENERAR UNA LISTA DE 10 ELEMENTOS
-    longitud_lista = random.randrange(1, 10)
+    longitud_lista = 15#random.randrange(1, 10)
     lista_random = []
     for i in range(longitud_lista):
-        lista_random.append(random.randrange(100))
+        x = random.randrange(100)
+        if x not in lista_random:   # Evitamos que se agreguen elementos repetidos
+            lista_random.append(x)
 
 
     cola = Cola_Binomial(lista_random) # Creamos una nueva estructura con los elementos de l
-    #cola.imprime_elementos_heap()
     #print(cola.array_estructura)
     cola.generar_bks()
+    #cola.imprime_elementos_heap()
