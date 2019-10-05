@@ -45,7 +45,7 @@ Se tiene la implementación de las siguientes funciones sobre la **Cola Binomial
 La carpeta tiene la siguiente estructura:
 - [DamianRivera]()
 	- [src](src/)
-		- [Colas_Binomiales.py](/src/Colas_Binomiales.py)
+		- [Colas_Binomiales.py](src/Colas_Binomiales.py)
 	- [README.md](README.md)
 
 El archivo principal es **Colas_Binomiales.py**. El cual contiene la implementación de _Colas Binomiales_ en Python (Version 3.7.4). Además de varios métodos auxiliares para que la implementación funcione, los principales son:
