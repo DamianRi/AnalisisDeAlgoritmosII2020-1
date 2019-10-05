@@ -28,7 +28,6 @@ class Heap:
 
     def shortToString(self):
         info = str(self.llave)+str(self.hijos)
-        #print(info)
         return info
 
 '''
@@ -37,12 +36,23 @@ class Heap:
 '''
 class Cola_Binomial:
 
+    '''
+        Constructor para una Cola Binomial nueva vacía
+    '''
+    def __init__(self):
+        self.array_estructura = []
+        self.elementos_heap = {}
+
+
+    '''
+        Constructor para una Cola Binomial dada una lista de elementos
+    '''
     def __init__(self, lista_elementos):
-        #lista_elementos.sort(reverse=True)  # Odrdenamos la lista de los elementos
         
         suma = sum(lista_elementos)
         size = len(format(len(lista_elementos), "b"))
 
+        # Resumen de los valores que tiene la Cola Binomal al creala
         print("\nElementos a agregar: ",
             lista_elementos,
             "\nNúmero de elementos: ",
@@ -55,10 +65,8 @@ class Cola_Binomial:
 
         self.elementos_heap = {}    # Diccionario para guardar los Heaps de toda la estructura
 
-        for e in lista_elementos:   # Creamos los heaps para cada elemento de la lista de elementos
-            
-            self.elementos_heap[e] = Heap(e)    # Creamos el Heap del elemento e y lo agregamos al diccionario
-            self.insertar(self.elementos_heap[e])   # Tomamos el Heap del elemento y lo agregamos a la estructura
+        for e in lista_elementos:   # Creamos los heaps para cada elemento de la lista de elementos            
+            self.insertar(e)    # Insertamos cada elemento de la lista
             
 
     '''
@@ -83,18 +91,7 @@ class Cola_Binomial:
         Método que regresa los elementos que están debajo de un Heap
         @param bk - heap raíz del bk
     '''
-    def elementos_en_bk(self, bk, elementos):
-        elementos.append(bk.llave)
-        for h in bk.hijos:
-            self.elementos_en_bk(self.elementos_heap[h], elementos)
-        return elementos
-
-
-    '''
-        Método que regresa los elementos que están debajo de un Heap
-        @param bk - heap raíz del bk
-    '''
-    def elementos_en_bk2(self, bk):
+    def elementos_en_bk(self, bk):
         stack = []  # lista para ir recorriendo todo el bk
         stack.append(bk.llave)    # agregamos el bk raíz
         
@@ -115,15 +112,13 @@ class Cola_Binomial:
         muestra la impresión de como esta formado el Bk
     '''
     def generar_bks(self):
-        print("\n= BK's ACTUALES =")
+        print("\n= BK's EN LA C.B. =")
         Bks = []
         for heap in self.array_estructura: # Para cada Heap en la estructura 
             if heap != None:    # Si no es nulo (si hay raíz del heap bk)
                 
                 grado_bk = heap.grado   # Obtenemos el grado del bk actual
-                l_heap = self.elementos_en_bk2(heap) # Obtenemos los elementos del heap actual
-                #l_heap = self.elementos_en_bk(heap, [])
-                #print(l_heap)
+                l_heap = self.elementos_en_bk(heap) # Obtenemos los elementos del heap actual
                 info = ""   # Generaremos la información del heap actual
                 
                 for h in l_heap:    # Para cada elemento de los elementos del bk
@@ -134,16 +129,22 @@ class Cola_Binomial:
             print("B"+str(bk[0])+": "+bk[1])
 
 
-
     '''
         Método para agregar un nuevo elemento (entero) a la estructura de datos
         nuevo_elemento : heap B0 con el valor del nuevo elemento como llave
     '''
     def insertar(self, nuevo_elemento):
+
+        heap_a_acomodar = self.elementos_heap.get(nuevo_elemento, None) # Obtenemos el heap que debemos insertar en la cola
+
+        if heap_a_acomodar == None: # Si el nuevo elemento no está como Heap
+            self.elementos_heap[nuevo_elemento] = Heap(nuevo_elemento)    # Creamos el Heap del elemento nuevo_elemento y lo agregamos al diccionario
+            heap_a_acomodar = self.elementos_heap[nuevo_elemento]   # Obtenemos el Heap que insertaremos en la estructura
+            
+
         ordenado = False    #   Variable para saber si ya están todos los Bk's correctos
         
-        heap_a_acomodar = nuevo_elemento    # Este nuevo elemento es el que se debe agregar a la estructura
-        tipo_bk = nuevo_elemento.grado  # Grado del Bk con el cual se fundirá el heap del nuevo_elemento
+        tipo_bk = heap_a_acomodar.grado  # Grado del Bk con el cual se fundirá el heap del nuevo_elemento
         
         while(not ordenado):
             heap_mismo_rango = self.array_estructura[tipo_bk]   # Obtenemos el heap con el mismo rango que el que se acomodará
@@ -234,7 +235,7 @@ class Cola_Binomial:
         print(
             "Mínimo Global: "+ str(self.array_estructura[indice].llave), 
             "Indice Heap: B"+ str(indice)) 
-        return indice
+        return (indice, self.array_estructura[indice].llave)
 
 
     '''
@@ -242,7 +243,9 @@ class Cola_Binomial:
     '''
     def eliminar_minimo_global(self):
         print("\n - ELIMINAR MÍNIMO GLOBAL")
-        indice_eliminar = self.encontrar_minimo()
+        tupla_minimo = self.encontrar_minimo()  # Obtenemos la tupla del indice, llave del mínimo
+        indice_eliminar = tupla_minimo[0]   # índice de la raíz mínima
+        llave_eliminar = tupla_minimo[1]    # llave de la raíz mínima
 
         heap = self.array_estructura[indice_eliminar]   # Heap raíz que se eliminará
         self.array_estructura[indice_eliminar] = None   # Eliminamos el heap de las raices Bk's
@@ -253,14 +256,12 @@ class Cola_Binomial:
         
         del self.elementos_heap[heap_eliminar.llave]    # Eliminamos el heap de la colección
 
-        #print("Huerfanos: "+str(huerfanos))
-        
         for huerfano in huerfanos:
             h = self.elementos_heap[huerfano]   # Heap huerfano para reacomodar
             h.padre = None
-            self.insertar(h)    # Insertando cada nodo huerfano se reacomodará la cola binomial
+            self.insertar(huerfano)    # Insertando cada nodo huerfano se reacomodará la cola binomial
 
-        print("Se eliminó: "+str(heap.llave))
+        print("Se eliminó la raíz del B"+str(indice_eliminar)+" Llave: "+str(llave_eliminar))
         return(heap.llave)
 
 
@@ -272,22 +273,21 @@ if __name__ == "__main__":
         lista = []
         if len(sys.argv) < 2:
             # VALORES RANDOM PARA GENERAR UNA LISTA DE 10 ELEMENTOS
-            longitud_lista = random.randrange(1, 10)
+            longitud_lista = random.randrange(1, 20)
             for i in range(longitud_lista):
-                x = random.randrange(100)
+                x = random.randrange(1, 100)
                 if x not in lista:   # Evitamos que se agreguen elementos repetidos
                     lista.append(x)
 
-            lista = [8,4,1,3,6,9,15]
             cola = Cola_Binomial(lista) # Creamos una nueva estructura con los elementos de l
             cola.generar_bks()
-            #cola.imprime_elementos_heap()
+            #cola.imprime_elementos_heap()  # Descomentar si se quieren ver la estructura de cada Heap antes de eliminar el mínimo
             cola.eliminar_minimo_global()
             cola.generar_bks()
-            #cola.imprime_elementos_heap()
+            #cola.imprime_elementos_heap()  # Descomentar si se quieren ver la estructura de cada Heap despues de eliminar el mínimo
 
 
-        elif sys.argv[1] == "m":
+        elif sys.argv[1] == "-m":
             # INGRESAMOS LOS ELEMENTOS PARA AGREGAR EN LA ESTRUCTURA
             ELEMENTOS = input("Ingresa los elementos para agregar (enteros separados por una ','[coma]):  ")
             ELEMENTOS = ELEMENTOS.split(',')
@@ -303,14 +303,14 @@ if __name__ == "__main__":
 
             cola = Cola_Binomial(lista) # Creamos una nueva estructura con los elementos de l
             cola.generar_bks()
-            #cola.imprime_elementos_heap()
+            #cola.imprime_elementos_heap()  # Descomentar si se quieren ver la estructura de cada Heap antes de eliminar el mínimo
             cola.eliminar_minimo_global()
             cola.generar_bks()
-            #cola.imprime_elementos_heap()
+            #cola.imprime_elementos_heap()  # Descomentar si se quieren ver la estructura de cada Heap despues de eliminar el mínimo
 
 
         else:
-            print("Uso: $ python3 Colas_Binomiales.py <arg>", "\n<arg>: m: manual  (opcional)")
+            print("Uso: $ python3 Colas_Binomiales.py <arg>", "\n<arg>: -m: manual  (opcional)")
     except KeyboardInterrupt:
         print("\n - PROGRAMA CANCELADO")
         quit()
