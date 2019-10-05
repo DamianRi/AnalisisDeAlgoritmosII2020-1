@@ -69,7 +69,7 @@ class Cola_Binomial:
         for e in range(indice+1, len(self.array_estructura)):    # Buscamos sobre los Bk en la estructura
             if self.array_estructura[e] != None:   # Obtenemos el siguiente heap
                 return e    # Regresamos el indice del siguiente heap
-
+        return None
 
     '''
         Imprime todos los elementos como HEAP dentro de la estructura
@@ -156,7 +156,10 @@ class Cola_Binomial:
     
                 if indice_sHrn != None: # Si tiene un siguiente hermano se lo asignamos
                     nuevo_heap.s_hrn = self.array_estructura[indice_sHrn].llave   # Asignamos su siguiente hermano del heap que acabamos de agregar
-                    
+
+                else:
+                    nuevo_heap.s_hrn = None # Si ya no hay un Bk+1 no tendrá siguiente hermano
+
                 self.array_estructura[tipo_bk] = nuevo_heap # Acomodamos al nuevo heap como el actual Bk
                 
                 ordenado = True # Salimos del while
@@ -165,7 +168,7 @@ class Cola_Binomial:
             heap_a_acomodar = nuevo_heap    # El heap actual a acomodar es el que se ha creado
             tipo_bk = nuevo_heap.grado  # El heap con el que se debe fundir el nuevo heap es con uno de su mismo rango
         
-        self.generar_bks()
+        #self.generar_bks()
 
 
     '''
@@ -206,8 +209,59 @@ class Cola_Binomial:
             else:
                 return bk2 
 
+    '''
+        Método para encontrar el índice del heap raíz con el menos valor
+    '''
+    def encontrar_minimo(self):
+        primerE = 0
+        # Obtenemos el índice del primer elemento en los Bk's
+        for i in range(len(self.array_estructura)):
+            if self.array_estructura[i] != None:
+                primerE = i
+                break
 
-            
+        min = self.array_estructura[primerE].llave  # Minimo inicial
+        indice = primerE    # índice del heap mínimo
+
+        # Búscamos el mínimo global sobre los demás Bk's
+        for i in range(primerE, len(self.array_estructura)):
+            heapActual = self.array_estructura[i]   # Compararemos con el actual
+            if heapActual != None:  # Revisamos que no sea None
+                if heapActual.llave <= min:
+                    min = heapActual.llave
+                    indice = i
+
+        print(
+            "Mínimo Global: "+ str(self.array_estructura[indice].llave), 
+            "Indice Heap: B"+ str(indice)) 
+        return indice
+
+
+    '''
+        Función para eliminar el mínimo global de la estructura
+    '''
+    def eliminar_minimo_global(self):
+        print("\n - ELIMINAR MÍNIMO GLOBAL")
+        indice_eliminar = self.encontrar_minimo()
+
+        heap = self.array_estructura[indice_eliminar]   # Heap raíz que se eliminará
+        self.array_estructura[indice_eliminar] = None   # Eliminamos el heap de las raices Bk's
+
+        heap_eliminar = self.elementos_heap[heap.llave]   # Obtenemos los valores del heap a eliminar
+        huerfanos = heap_eliminar.hijos # Obtenemos los BK's huerfanos
+        huerfanos.reverse() # Ordenamos para reorganizar cada BK huerfano
+        
+        del self.elementos_heap[heap_eliminar.llave]    # Eliminamos el heap de la colección
+
+        #print("Huerfanos: "+str(huerfanos))
+        
+        for huerfano in huerfanos:
+            h = self.elementos_heap[huerfano]   # Heap huerfano para reacomodar
+            h.padre = None
+            self.insertar(h)    # Insertando cada nodo huerfano se reacomodará la cola binomial
+
+        print("Se eliminó: "+str(heap.llave))
+        return(heap.llave)
 
 
 
@@ -218,7 +272,7 @@ if __name__ == "__main__":
         lista = []
         if len(sys.argv) < 2:
             # VALORES RANDOM PARA GENERAR UNA LISTA DE 10 ELEMENTOS
-            longitud_lista = random.randrange(1, 15)
+            longitud_lista = random.randrange(1, 10)
             for i in range(longitud_lista):
                 x = random.randrange(100)
                 if x not in lista:   # Evitamos que se agreguen elementos repetidos
@@ -226,6 +280,9 @@ if __name__ == "__main__":
 
             lista = [8,4,1,3,6,9,15]
             cola = Cola_Binomial(lista) # Creamos una nueva estructura con los elementos de l
+            cola.generar_bks()
+            #cola.imprime_elementos_heap()
+            cola.eliminar_minimo_global()
             cola.generar_bks()
             #cola.imprime_elementos_heap()
 
@@ -245,6 +302,9 @@ if __name__ == "__main__":
                 quit()
 
             cola = Cola_Binomial(lista) # Creamos una nueva estructura con los elementos de l
+            cola.generar_bks()
+            #cola.imprime_elementos_heap()
+            cola.eliminar_minimo_global()
             cola.generar_bks()
             #cola.imprime_elementos_heap()
 
