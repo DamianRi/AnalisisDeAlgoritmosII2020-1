@@ -44,7 +44,7 @@ Se tiene la implementación de las siguientes funciones sobre la **Cola Binomial
 ### Contenido
 La carpeta tiene la siguiente estructura:
 - [DamianRivera]()
-	- [src](/src)
+	- [src](src/)
 		- [Colas_Binomiales.py](/src/Colas_Binomiales.py)
 	- [README.md](README.md)
 
