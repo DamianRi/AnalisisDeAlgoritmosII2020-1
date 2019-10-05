@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import random
-import sys
 
 '''
     Clase para hacer la representación de cada objeto Heap
