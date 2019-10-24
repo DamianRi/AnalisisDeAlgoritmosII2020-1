@@ -157,87 +157,49 @@ class Fibonacci_Heap:
 
             self.elementos_heap[nuevo_elemento] = Heap(nuevo_elemento)    # Creamos el Heap del elemento nuevo_elemento y lo agregamos al diccionario
             self.elemento_minimo = nuevo_elemento   # El elemento mínimo será el primero en agregarse
-
+        
         else:
 
-            nuevo_heap = self.elementos_heap.get(nuevo_elemento, None) # Obtenemos el heap que debemos insertar en la cola
-
-            if nuevo_heap == None: # Si el nuevo elemento no está como Heap
-                self.elementos_heap[nuevo_elemento] = Heap(nuevo_elemento)    # Creamos el Heap del elemento nuevo_elemento y lo agregamos al diccionario
-
-            # Si hay un único elemento
-            if self.elementos_heap[self.elemento_minimo].s_hrn == self.elemento_minimo and self.elementos_heap[self.elemento_minimo].p_hrn == self.elemento_minimo:
-                
-                self.elementos_heap[nuevo_elemento].s_hrn = self.elemento_minimo 
-                self.elementos_heap[self.elemento_minimo].p_hrn = nuevo_elemento                                
-                self.elementos_heap[nuevo_elemento].p_hrn = self.elemento_minimo
-                self.elementos_heap[self.elemento_minimo].s_hrn = nuevo_elemento
-
-            # Si ya hay varios elementos
-            else:
-                self.elementos_heap[nuevo_elemento].s_hrn = self.elemento_minimo    
-                self.elementos_heap[nuevo_elemento].p_hrn = self.elementos_heap[self.elemento_minimo].p_hrn
-                
-                self.elementos_heap[self.elementos_heap[self.elemento_minimo].p_hrn].s_hrn = nuevo_elemento
-                self.elementos_heap[self.elemento_minimo].p_hrn = nuevo_elemento                
-
-        ## Verificamos si el nuevo elemento es menor que el mínimo actual
-        if nuevo_elemento < self.elementos_heap[self.elemento_minimo].llave:    
-            self.elemento_minimo = nuevo_elemento   # Actualizamos el valor del mínimo 
-
-
-
-    # PREGUNTAR POR ESTE MÉTODO, PORQUE RECIBE DOS ESTRUCTURAS F-HEAPS Y LAS JUNTA EN UNA SOLA
-    '''
-        Método para fundir dos Bk's del mismo rango,
-        recibe únicamente el Heap raíz de cada bk
-    '''
-    def fundir(self, bk1, bk2):
-        if bk2 != None and bk1 != None: # Aseguramos que allá dos Heaps que unir
-            raiz1 = bk1
-            raiz2 = bk2
-            
-            #   Si la llave de Bk1 es mayor o igual que la de Bk2
-            if raiz1.llave <= raiz2.llave:
-
-                self.elementos_heap[raiz2.llave].padre = raiz1.llave    # Marcamos como padre a Bk1 de Bk2
-                self.elementos_heap[raiz2.llave].s_hrn = None   # Marcamos como siguiente hermano None
-                self.elementos_heap[raiz1.llave].hijos.append(raiz2.llave)  # Agregamos como hijo a Bk2 de Bk1
-                self.elementos_heap[raiz1.llave].grado = len(self.elementos_heap[raiz1.llave].hijos)    # Actualizamos el grado del nodo raíz Bk2
-                
-                return raiz1    # Regreamos el Heap raíz del nuevo Bk
-            
-            #   Si la llve de Bk2 es mayor que la de Bk1
-            else:
-                self.elementos_heap[raiz1.llave].padre = raiz2.llave    # Marcamos como padre a Bk2 de Bk1
-                self.elementos_heap[raiz1.llave].s_hrn = None   # Marcamos como siguiente hermano None
-                self.elementos_heap[raiz2.llave].hijos.append(raiz1.llave)  # Agregamos como hijo a Bk1 de Bk2
-                self.elementos_heap[raiz2.llave].grado = len(self.elementos_heap[raiz2.llave].hijos)    # Actualizamos el grado del nodo raíz Bk2
-
-                return raiz2    # Regresamos el Heap raíz del nuevo Bk 
-            
-
-        #   Si uno de los dos Bk es vacío
-        else:
-            #   Regresamos bk1 si bk2 es vacio
-            if bk1 != None:
-                return bk1
-            #   Regresamos bk2 si bk1 es vacío 
-            else:
-                return bk2 
-
-
-        print(
-            "Mínimo Global: "+ str(self.array_estructura[indice].llave), 
-            "Indice Heap: B"+ str(indice)) 
-        return (indice, self.array_estructura[indice].llave)
+            self.elementos_heap[nuevo_elemento] = Heap(nuevo_elemento)    # Creamos el Heap del elemento nuevo_elemento y lo agregamos al diccionario
     
+            min = self.fundir(self.elemento_minimo, nuevo_elemento)
+            self.elemento_minimo = min
+        
+
+    '''
+        Método para fundir dos listas de Heaps
+        Recibe la raiz (elemento mínimo) de cada lista
+        y regresa el elemento mínimo de estas dos
+    '''
+    def fundir(self, R1, R2):
+        # Suponemos que las dos raices no son None
+
+
+        hermano_anterior_r1 = self.elementos_heap[R1].p_hrn
+        hermano_anterior_r2 = self.elementos_heap[R2].p_hrn
+
+        self.elementos_heap[R1].p_hrn = self.elementos_heap[R2].p_hrn
+        self.elementos_heap[R2].p_hrn = hermano_anterior_r1
+
+        self.elementos_heap[hermano_anterior_r1].s_hrn = R2
+        self.elementos_heap[hermano_anterior_r2].s_hrn = R1
+
+        # Regresamos la nueva raíz del nuevo F-heap
+        if R1 < R2:
+            return R1
+        elif R2 < R1:
+            return R2
+        else:
+            return R1
+
+
     '''
         Método que regresa la llave del nodo de llave menor global
     '''
     def encuentra_min(self):
         print("Mínimo Global:",self.elemento_minimo)
         return self.elemento_minimo
+
 
     # HAY QUE REDEFINIR ESTA FUNCIÓN
     '''
@@ -275,14 +237,14 @@ if __name__ == "__main__":
         lista = []
         #if len(sys.argv) < 2:
         # VALORES RANDOM PARA GENERAR UNA LISTA DE 10 ELEMENTOS
-        longitud_lista = 4#random.randrange(1, 10)
+        longitud_lista = 5#random.randrange(1, 10)
         for i in range(longitud_lista):
             x = random.randrange(1, 100)
             if x not in lista:   # Evitamos que se agreguen elementos repetidos
                 lista.append(x)
 
         cola = Fibonacci_Heap(lista) # Creamos una nueva estructura con los elementos de l
-        #cola.imprime_elementos_heap()
+        cola.imprime_elementos_heap()
         #cola.generar_bks()
         cola.encuentra_min()
         '''
