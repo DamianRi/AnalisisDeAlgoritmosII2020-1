@@ -30,7 +30,7 @@ class Heap:
             "\n- - - - - - - -")
 
     def shortToString(self):
-        info = str(self.p_hrn)+str(self.llave)+str(self.s_hrn)+str(self.marcado)
+        info =  "[P:"+str(self.padre)+"|LL:"+str(self.llave)+"|SH:"+str(self.s_hrn)+"|PH:"+str(self.p_hrn)+"|M:"+str(self.marcado)+"]"
         return info
 
 '''
@@ -55,15 +55,11 @@ class Fibonacci_Heap:
         self.elementos_heap = {}    # Diccionario para guardar los Heaps de toda la estructura
         self.elemento_minimo = None
 
-        suma = sum(lista_elementos)
-        size = len(format(len(lista_elementos), "b"))
-
         # Resumen de los valores que tiene la Cola Binomal al creala
         print("\nElementos a agregar: ",
             lista_elementos,
             "\nNúmero de elementos: ",
             len(lista_elementos))
-
 
         for e in lista_elementos:   # Creamos los heaps para cada elemento de la lista de elementos            
             self.insertar(e)    # Insertamos cada elemento de la lista
@@ -74,10 +70,7 @@ class Fibonacci_Heap:
         que se da como parametro
     '''
     def siguiente_bk(self, indice):
-        for e in range(indice+1, len(self.array_estructura)):    # Buscamos sobre los Bk en la estructura
-            if self.array_estructura[e] != None:   # Obtenemos el siguiente heap
-                return e    # Regresamos el indice del siguiente heap
-        return None
+        pass
 
     '''
         Imprime todos los elementos como HEAP dentro de la estructura
@@ -99,12 +92,22 @@ class Fibonacci_Heap:
             actual = stack.pop()    #   tomamos el tope de la lista elementos
             lista.append(actual)  #   agregamos la llave a la lista
 
-            #
-            #   HAY QUE MODIFICAR PARA QUE RECORRA LA LISTA DOBLEMENTE LIGADA DE LOS HEAPS
-            #
-            for e in self.elementos_heap[actual].hijos: # para cada elemento hijo del heap actual
-                if e not in lista:
-                    stack.append(e)
+            hijo_actual = self.elementos_heap[actual].hijo  # Iniciamos con la referencia del hijo
+            
+            if hijo_actual != None: # Si tiene al menos un hijo
+
+                hijos = []  # lista de hijos
+                hijos.append(hijo_actual)   #   Agregamos al hijo directo a la lista de hijos
+                hermano = self.elementos_heap[hijo_actual].s_hrn    # Hermano del la referencia al hijo
+                
+                while hermano not in hijos:
+                    hijos.append(hermano)   # Agregamos al hermano    
+                    hijo_actual = hermano
+                    hermano = self.elementos_heap[hijo_actual].s_hrn
+
+                for nodo in hijos: # para cada elemento hijo del heap actual
+                    if nodo not in lista:
+                        stack.append(nodo)
 
         return lista
 
@@ -116,7 +119,20 @@ class Fibonacci_Heap:
     def generar_bks(self):
         print("\n= BK's EN LA C.B. =")
         Bks = []
-        for heap in self.array_estructura: # Para cada Heap en la estructura 
+        Raices = []
+
+        raiz_inicial = self.elementos_heap.get(self.elemento_minimo, None)
+        Raices.append(raiz_inicial)   #   Agregamos al hijo directo a la lista de hijos
+        hermano = self.elementos_heap.get(raiz_inicial.s_hrn, None)    # Hermano del la referencia al hijo
+
+        # Generamos la lista de raices
+        while hermano not in Raices:
+            Raices.append(hermano)
+            raiz_inicial = hermano
+            hermano = self.elementos_heap.get(raiz_inicial.s_hrn, None)
+
+
+        for heap in Raices: # Para cada Heap en la estructura 
             if heap != None:    # Si no es nulo (si hay raíz del heap bk)
                 
                 grado_bk = heap.grado   # Obtenemos el grado del bk actual
@@ -169,37 +185,9 @@ class Fibonacci_Heap:
         if nuevo_elemento < self.elementos_heap[self.elemento_minimo].llave:    
             self.elemento_minimo = nuevo_elemento   # Actualizamos el valor del mínimo 
 
-        '''
-        ordenado = False    #   Variable para saber si ya están todos los Bk's correctos
-        
-        tipo_bk = heap_a_acomodar.grado  # Grado del Bk con el cual se fundirá el heap del nuevo_elemento
-        
-        while(not ordenado):
-            heap_mismo_rango = self.array_estructura[tipo_bk]   # Obtenemos el heap con el mismo rango que el que se acomodará
-            self.array_estructura[tipo_bk] = None   # Eliminamos como Bk al heap que se fundió
 
-            nuevo_heap = self.fundir(heap_a_acomodar, heap_mismo_rango)  # raiz del nuevo Bk
-            
-            if heap_mismo_rango == None:    # Si no había un Bk en k+1
-                indice_sHrn = self.siguiente_bk(tipo_bk)    # Obtenemos el índice del siguiente hermano del heap que se agregó
-    
-                if indice_sHrn != None: # Si tiene un siguiente hermano se lo asignamos
-                    nuevo_heap.s_hrn = self.array_estructura[indice_sHrn].llave   # Asignamos su siguiente hermano del heap que acabamos de agregar
 
-                else:
-                    nuevo_heap.s_hrn = None # Si ya no hay un Bk+1 no tendrá siguiente hermano
-
-                self.array_estructura[tipo_bk] = nuevo_heap # Acomodamos al nuevo heap como el actual Bk
-                
-                ordenado = True # Salimos del while
-                continue
-
-            heap_a_acomodar = nuevo_heap    # El heap actual a acomodar es el que se ha creado
-            tipo_bk = nuevo_heap.grado  # El heap con el que se debe fundir el nuevo heap es con uno de su mismo rango
-        
-        #self.generar_bks()
-        '''
-
+    # PREGUNTAR POR ESTE MÉTODO, PORQUE RECIBE DOS ESTRUCTURAS F-HEAPS Y LAS JUNTA EN UNA SOLA
     '''
         Método para fundir dos Bk's del mismo rango,
         recibe únicamente el Heap raíz de cada bk
@@ -238,34 +226,20 @@ class Fibonacci_Heap:
             else:
                 return bk2 
 
-    '''
-        Método para encontrar el índice del heap raíz con el menos valor
-    '''
-    def encontrar_minimo(self):
-        primerE = 0
-        # Obtenemos el índice del primer elemento en los Bk's
-        for i in range(len(self.array_estructura)):
-            if self.array_estructura[i] != None:
-                primerE = i
-                break
-
-        min = self.array_estructura[primerE].llave  # Minimo inicial
-        indice = primerE    # índice del heap mínimo
-
-        # Búscamos el mínimo global sobre los demás Bk's
-        for i in range(primerE, len(self.array_estructura)):
-            heapActual = self.array_estructura[i]   # Compararemos con el actual
-            if heapActual != None:  # Revisamos que no sea None
-                if heapActual.llave <= min:
-                    min = heapActual.llave
-                    indice = i
 
         print(
             "Mínimo Global: "+ str(self.array_estructura[indice].llave), 
             "Indice Heap: B"+ str(indice)) 
         return (indice, self.array_estructura[indice].llave)
+    
+    '''
+        Método que regresa la llave del nodo de llave menor global
+    '''
+    def encuentra_min(self):
+        print("Mínimo Global:",self.elemento_minimo)
+        return self.elemento_minimo
 
-
+    # HAY QUE REDEFINIR ESTA FUNCIÓN
     '''
         Función para eliminar el mínimo global de la estructura
     '''
@@ -297,7 +271,7 @@ class Fibonacci_Heap:
 if __name__ == "__main__":
     
     try:
-        print("\n < COLAS BINOMIALES >")
+        print("\n < FIBONACCI HEAPS >")
         lista = []
         #if len(sys.argv) < 2:
         # VALORES RANDOM PARA GENERAR UNA LISTA DE 10 ELEMENTOS
@@ -308,7 +282,9 @@ if __name__ == "__main__":
                 lista.append(x)
 
         cola = Fibonacci_Heap(lista) # Creamos una nueva estructura con los elementos de l
-        cola.imprime_elementos_heap()
+        #cola.imprime_elementos_heap()
+        #cola.generar_bks()
+        cola.encuentra_min()
         '''
         elif sys.argv[1] == "-m":
             # INGRESAMOS LOS ELEMENTOS PARA AGREGAR EN LA ESTRUCTURA
