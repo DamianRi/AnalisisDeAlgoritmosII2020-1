@@ -205,17 +205,20 @@ class Fibonacci_Heap:
         Liga dos árboles del mismo rango
     '''
     def link(self, R1, R2):
-        
+        print("LIGANDO RAICES", R1, R2)
         if R1 <= R2:
+
             self.elementos_heap[R2].padre = R1  # Ponemos como padre a R1 de R2
             hijo_r1 = self.elementos_heap[R1].hijo
             self.elementos_heap[R1].hijo = R2   # Ponemos como hijo a R2 de R1
 
-
             # Cambiamos las referencias para quitar a R2 como raíz
+            self.elementos_heap[self.elementos_heap[R2].p_hrn].s_hrn = self.elementos_heap[R2].s_hrn
+            self.elementos_heap[self.elementos_heap[R2].s_hrn].p_hrn = self.elementos_heap[R2].p_hrn            
+            '''
             self.elementos_heap[R1].s_hrn = self.elementos_heap[R2].s_hrn
             self.elementos_heap[self.elementos_heap[R2].s_hrn].p_hrn = R1
-
+            '''
             # Preparamos a R2 para fundir con los hijos de R1
             self.elementos_heap[R2].s_hrn = R2
             self.elementos_heap[R2].p_hrn = R2
@@ -226,14 +229,18 @@ class Fibonacci_Heap:
             self.elementos_heap[R1].grado += 1  # Aumentamos el rango             
 
         elif R1 > R2:
+
             self.elementos_heap[R1].padre = R2  # Ponemos como padre a R2 de R1
             hijo_r2 = self.elementos_heap[R2].hijo
             self.elementos_heap[R2].hijo = R1   # Ponemos como hijo a R1 de R2
 
             # Cambiamos las referencias para quitar a R1 como raíz
+            self.elementos_heap[self.elementos_heap[R1].p_hrn].s_hrn = self.elementos_heap[R1].s_hrn
+            self.elementos_heap[self.elementos_heap[R1].s_hrn].p_hrn = self.elementos_heap[R1].p_hrn            
+            '''
             self.elementos_heap[R2].s_hrn = self.elementos_heap[R1].s_hrn
             self.elementos_heap[self.elementos_heap[R1].s_hrn].p_hrn = R2
-
+            '''
             # Preparamos a R1 para fundir con los hijos de R2
             self.elementos_heap[R1].s_hrn = R1
             self.elementos_heap[R1].p_hrn = R1
@@ -248,15 +255,56 @@ class Fibonacci_Heap:
         Función para eliminar el mínimo global de la estructura
     '''
     def borra_min(self):
+        print("BORRANDO MÍNIMO")
+
         min = self.elemento_minimo
         hijo = self.elementos_heap[self.elemento_minimo].hijo   # Obtenemos el hijo del elemento mínimo
-
-        # Si el mínimo es una raíz única, entonces eliminamos        
-        if self.elementos_heap[self.elemento_minimo].s_hrn != self.elementos_heap[self.elemento_minimo].p_hrn:
-            self.elementos_heap[self.elementos_heap[min].p_hrn].s_hrn = self.elementos_heap[self.elemento_minimo].s_hrn  
-            self.elementos_heap[self.elementos_heap[min].s_hrn].p_hrn = self.elementos_heap[self.elemento_minimo].p_hrn
+        s_hermano = self.elementos_heap[self.elemento_minimo].s_hrn # Obtenemos el valor del siguiente hermano
         
-        del self.elementos_heap[self.elemento_minimo]   # Eliminamos el Heap mínimo
+        # Si el mínimo no es una raíz única, entonces eliminamos        
+        if self.elementos_heap[min].s_hrn != min and self.elementos_heap[min].p_hrn != min:
+            print("Entrando aquí ")
+
+            self.elementos_heap[self.elementos_heap[min].p_hrn].s_hrn = self.elementos_heap[min].s_hrn  
+            self.elementos_heap[self.elementos_heap[min].s_hrn].p_hrn = self.elementos_heap[min].p_hrn
+        
+            self.elemento_minimo = self.buscar_min(s_hermano)   # Obtenemos el nuevo mínimo
+
+        print(min)
+        del self.elementos_heap[min]   # Eliminamos el Heap mínimo
+
+
+        #
+        #
+        #   POR AGREGAR A LOS NODOS HIJOS DE MIN, COMO NODOS RAÍZ Y REORGANIZAR
+        #
+        #
+
+        print("NODO HIJO", hijo)
+
+
+
+        print("SE ELIMINÓ EL MÍNIMO: ", min)
+
+    ''' 
+        Auxiliar:
+        Función que al eliminiar el mínimo global, buscará el nuevo mínimo entre las raices.
+    '''
+    def buscar_min(self, inicio):
+        candidatos = [] # Nodos raiz
+        candidatos.append(inicio)
+
+        siguiente_hermano = self.elementos_heap[inicio].s_hrn          
+        while(siguiente_hermano not in candidatos): # Mientras un nodo raíz no este lo agregamos
+            candidatos.append(siguiente_hermano)
+            # Recorremos sobre el nodo siguiente hasta que uno se repita
+            siguiente_hermano = self.elementos_heap[siguiente_hermano].s_hrn
+
+        # Regresamos el mínimo de todas la raices
+        return min(candidatos)
+
+
+
 
 
 if __name__ == "__main__":
@@ -276,8 +324,15 @@ if __name__ == "__main__":
         cola.imprime_elementos_heap()
         #cola.generar_bks()
         cola.encuentra_min()
-        cola.link(lista[0], lista[1])
+
+        minimo = min(lista)
+        maximo = max(lista)
+
+        cola.link(minimo, maximo)
         cola.imprime_elementos_heap()
+        cola.borra_min()
+        cola.imprime_elementos_heap()
+        cola.encuentra_min()
         '''
         elif sys.argv[1] == "-m":
             # INGRESAMOS LOS ELEMENTOS PARA AGREGAR EN LA ESTRUCTURA
