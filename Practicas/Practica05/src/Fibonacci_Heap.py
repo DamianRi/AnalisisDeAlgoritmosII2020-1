@@ -201,33 +201,62 @@ class Fibonacci_Heap:
         return self.elemento_minimo
 
 
-    # HAY QUE REDEFINIR ESTA FUNCIÓN
+    '''
+        Liga dos árboles del mismo rango
+    '''
+    def link(self, R1, R2):
+        
+        if R1 <= R2:
+            self.elementos_heap[R2].padre = R1  # Ponemos como padre a R1 de R2
+            hijo_r1 = self.elementos_heap[R1].hijo
+            self.elementos_heap[R1].hijo = R2   # Ponemos como hijo a R2 de R1
+
+
+            # Cambiamos las referencias para quitar a R2 como raíz
+            self.elementos_heap[R1].s_hrn = self.elementos_heap[R2].s_hrn
+            self.elementos_heap[self.elementos_heap[R2].s_hrn].p_hrn = R1
+
+            # Preparamos a R2 para fundir con los hijos de R1
+            self.elementos_heap[R2].s_hrn = R2
+            self.elementos_heap[R2].p_hrn = R2
+            # Si R1 tiene hijo los enlazamos
+            if hijo_r1 != None:
+                self.fundir(hijo_r1, R2)
+
+            self.elementos_heap[R1].grado += 1  # Aumentamos el rango             
+
+        elif R1 > R2:
+            self.elementos_heap[R1].padre = R2  # Ponemos como padre a R2 de R1
+            hijo_r2 = self.elementos_heap[R2].hijo
+            self.elementos_heap[R2].hijo = R1   # Ponemos como hijo a R1 de R2
+
+            # Cambiamos las referencias para quitar a R1 como raíz
+            self.elementos_heap[R2].s_hrn = self.elementos_heap[R1].s_hrn
+            self.elementos_heap[self.elementos_heap[R1].s_hrn].p_hrn = R2
+
+            # Preparamos a R1 para fundir con los hijos de R2
+            self.elementos_heap[R1].s_hrn = R1
+            self.elementos_heap[R1].p_hrn = R1
+            # Si R2 tiene hijo los enlazamos
+            if hijo_r2 != None:
+                self.fundir(hijo_r2, R1)
+
+            self.elementos_heap[R2].grado += 1  # Aumentamos el rango
+
+
     '''
         Función para eliminar el mínimo global de la estructura
     '''
-    def eliminar_minimo_global(self):
-        print("\n - ELIMINAR MÍNIMO GLOBAL")
-        tupla_minimo = self.encontrar_minimo()  # Obtenemos la tupla del indice, llave del mínimo
-        indice_eliminar = tupla_minimo[0]   # índice de la raíz mínima
-        llave_eliminar = tupla_minimo[1]    # llave de la raíz mínima
+    def borra_min(self):
+        min = self.elemento_minimo
+        hijo = self.elementos_heap[self.elemento_minimo].hijo   # Obtenemos el hijo del elemento mínimo
 
-        heap = self.array_estructura[indice_eliminar]   # Heap raíz que se eliminará
-        self.array_estructura[indice_eliminar] = None   # Eliminamos el heap de las raices Bk's
-
-        heap_eliminar = self.elementos_heap[heap.llave]   # Obtenemos los valores del heap a eliminar
-        huerfanos = heap_eliminar.hijos # Obtenemos los BK's huerfanos
-        huerfanos.reverse() # Ordenamos para reorganizar cada BK huerfano
+        # Si el mínimo es una raíz única, entonces eliminamos        
+        if self.elementos_heap[self.elemento_minimo].s_hrn != self.elementos_heap[self.elemento_minimo].p_hrn:
+            self.elementos_heap[self.elementos_heap[min].p_hrn].s_hrn = self.elementos_heap[self.elemento_minimo].s_hrn  
+            self.elementos_heap[self.elementos_heap[min].s_hrn].p_hrn = self.elementos_heap[self.elemento_minimo].p_hrn
         
-        del self.elementos_heap[heap_eliminar.llave]    # Eliminamos el heap de la colección
-
-        for huerfano in huerfanos:
-            h = self.elementos_heap[huerfano]   # Heap huerfano para reacomodar
-            h.padre = None
-            self.insertar(huerfano)    # Insertando cada nodo huerfano se reacomodará la Fibonacci Heap
-
-        print("Se eliminó la raíz del B"+str(indice_eliminar)+" Llave: "+str(llave_eliminar))
-        return(heap.llave)
-
+        del self.elementos_heap[self.elemento_minimo]   # Eliminamos el Heap mínimo
 
 
 if __name__ == "__main__":
@@ -237,7 +266,7 @@ if __name__ == "__main__":
         lista = []
         #if len(sys.argv) < 2:
         # VALORES RANDOM PARA GENERAR UNA LISTA DE 10 ELEMENTOS
-        longitud_lista = 5#random.randrange(1, 10)
+        longitud_lista = 4#random.randrange(1, 10)
         for i in range(longitud_lista):
             x = random.randrange(1, 100)
             if x not in lista:   # Evitamos que se agreguen elementos repetidos
@@ -247,6 +276,8 @@ if __name__ == "__main__":
         cola.imprime_elementos_heap()
         #cola.generar_bks()
         cola.encuentra_min()
+        cola.link(lista[0], lista[1])
+        cola.imprime_elementos_heap()
         '''
         elif sys.argv[1] == "-m":
             # INGRESAMOS LOS ELEMENTOS PARA AGREGAR EN LA ESTRUCTURA
