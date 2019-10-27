@@ -36,7 +36,7 @@ La carpeta tiene la siguiente estructura:
 	- [src](src/)
 		- [Fibonacci_Heap.py](src/Fibonacci_Heap.py)
     - [img](img/)
-        - [fibo-heaps.png](src/fibo-heaps.png)
+        - [fibo-heaps.png](img/fibo-heaps.png)
 	- [README.md](README.md)
 
 El código principal se encuentra en el archivo **Fibonacci_Heap.py**. Dentro de la Carpeta *__img__* se encuentra una imagen del programa ejecutado en terminal.
